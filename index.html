@@ -7,14 +7,20 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="./style.css">
   </head>
-  <body>
+  <body id="app">
     <div class="row">
       <div class="col-xs-2">
         <div class="sidebar">
           <div class="header">
             <p>History</p>
+            <p>{{ message }}</p>
           </div>
-          <div class="previous-request-list"></div>
+          <div class="previous-request-list">
+            <div class="previous-request" v-for="previousRequest in previousRequests" v-on:click="populateRequestForm($index)">
+              <small class="{{ previousRequest.requestType }}">{{ previousRequest.requestType }}</small>
+              {{ previousRequest.requestLink }}
+            </div>
+          </div>
         </div>
       </div>
       <div class="col-xs-10 container">
@@ -23,7 +29,7 @@
           <div class="row">
             <div class="col-xs-2">
               <div class="form-group">
-                <select name="request" class="form-control main-request-type">
+                <select name="request" class="form-control main-request-type" v-model="requestType">
                   <option value="get">GET</option>
                   <option value="post">POST</option>
                   <option value="put">PUT</option>
@@ -34,26 +40,26 @@
             </div>
             <div class="col-xs-8">
               <div class="form-group">
-                <input type="text" class="form-control main-request-link" placeholder="link" value="http://api.football-data.org/v1/soccerseasons/424/">
+                <input type="text" class="form-control main-request-link" v-model="requestLink" placeholder="link" value="http://api.football-data.org/v1/soccerseasons/424/">
               </div>
             </div>
             <div class="col-xs-2">
-              <button type="submit" class="btn btn-primary main-submit-button">Submit</button>
+              <button type="submit" class="btn btn-primary main-submit-button" v-on:click="addPreviousRequest()">Submit</button>
             </div>
           </div>
-          <div class="row header-row-template">
+          <div class="row" v-for="requestHeader in requestHeaders" track-by="$index">
             <div class="col-xs-5">
               <div class="form-group">
-                <input type="text" class="form-control header-name" placeholder="header-name" value="X-Auth-Token">
+                <input type="text" class="form-control header-name" placeholder="header-name" value="{{ requestHeader.name }}">
               </div>
             </div>
             <div class="col-xs-5">
               <div class="form-group">
-                <input type="text" class="form-control header-value" placeholder="header-value" value="fe33c7da872942c19b6c5f236797cd7b">
+                <input type="text" class="form-control header-value" placeholder="header-value" value="{{ requestHeader.value }}">
               </div>
             </div>
             <div class="col-xs-2">
-              <button type="submit" class="btn btn-default header-add-button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+              <button type="submit" class="btn btn-default header-add-button" v-on:click.prevent="addHeaderRow($index)" v-show="!clicked[$index]"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
             </div>
           </div>
         </form>
@@ -69,6 +75,7 @@
       </div>
     </div>
   </body>
+  <script src="vue.js"></script>
   <script>
 		var path = require('path');
     require('./renderer.js');
@@ -121,46 +128,5 @@
         requestEditorHidden.innerHTML = value;
       });
 		});
-
-    document.addEventListener("DOMContentLoaded", function(event) {
-      var headerRowTemplate = document.getElementsByClassName('header-row-template')[0];
-      var headerAddButtons = document.getElementsByClassName('header-add-button');
-      var mainForm = document.getElementsByClassName('main-submit-form')[0];
-
-      newHeaderRow = document.createElement('div');
-      newHeaderRow.setAttribute('class', 'row');
-      newHeaderRow.innerHTML = headerRowTemplate.innerHTML;
-      mainForm.appendChild(newHeaderRow);
-      updateHeaderButtonListeners();
-
-      function updateHeaderButtonListeners(){
-        for(var i = 0; i < headerAddButtons.length; i++){
-          if(i == 1 && headerAddButtons.length > 2){
-            headerAddButtons[i].parentElement.removeChild(headerAddButtons[i]);
-          }
-          if(typeof headerAddButtons[i] == 'object'){
-            headerAddButtons[i].addEventListener('click', function(e){
-              e.preventDefault();
-              newHeaderRow = document.createElement('div');
-              newHeaderRow.setAttribute('class', 'row');
-              newHeaderRow.innerHTML = headerRowTemplate.innerHTML;
-
-              for(var j = 0; j < (newHeaderRow.children.length - 1); j++){
-                newHeaderRow.children[j].children[0].children[0].value = "";
-              }
-
-              mainForm.appendChild(newHeaderRow);
-              updateHeaderButtonListeners();
-            });
-          }
-        }
-      }
-    });
-
-    document.addEventListener('keydown', function(e){
-      if(e.keyCode == 116){
-        location.reload();
-      }
-    });
 	</script>
 </html>
