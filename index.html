@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Mailman</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <div class="row">
+      <div class="col-xs-2">
+        <div class="sidebar">
+          <div class="header">
+            <p>History</p>
+          </div>
+          <div class="previous-request-list"></div>
+        </div>
+      </div>
+      <div class="col-xs-10 container">
+        <h1>Mailman</h1>
+        <form class="main-submit-form">
+          <div class="row">
+            <div class="col-xs-2">
+              <div class="form-group">
+                <select name="request" class="form-control main-request-type">
+                  <option value="get">GET</option>
+                  <option value="post">POST</option>
+                  <option value="put">PUT</option>
+                  <option value="patch">PATCH</option>
+                  <option value="delete">DELETE</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-xs-8">
+              <div class="form-group">
+                <input type="text" class="form-control main-request-link" placeholder="link" value="http://api.football-data.org/v1/soccerseasons/424/">
+              </div>
+            </div>
+            <div class="col-xs-2">
+              <button type="submit" class="btn btn-primary main-submit-button">Submit</button>
+            </div>
+          </div>
+          <div class="row header-row-template">
+            <div class="col-xs-5">
+              <div class="form-group">
+                <input type="text" class="form-control header-name" placeholder="header-name" value="X-Auth-Token">
+              </div>
+            </div>
+            <div class="col-xs-5">
+              <div class="form-group">
+                <input type="text" class="form-control header-value" placeholder="header-value" value="fe33c7da872942c19b6c5f236797cd7b">
+              </div>
+            </div>
+            <div class="col-xs-2">
+              <button type="submit" class="btn btn-default header-add-button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+            </div>
+          </div>
+        </form>
+        <div class="main-body-wrapper">
+          Request:
+          <div class="request-editor"></div>
+          <div class="response-status">Ready.</div>
+          Response:
+          <div class="main-body"></div>
+          <textarea class="main-body-hidden hidden"></textarea>
+          <textarea class="request-editor-hidden hidden"></textarea>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+		var path = require('path');
+    require('./renderer.js');
+	</script>
+  <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+  <script>
+		function uriFromPath(_path) {
+			var pathName = path.resolve(_path).replace(/\\/g, '/');
+			if (pathName.length > 0 && pathName.charAt(0) !== '/') {
+				pathName = '/' + pathName;
+			}
+			return encodeURI('file://' + pathName);
+		}
+		require.config({
+			baseUrl: uriFromPath(path.join(__dirname, './node_modules/monaco-editor/min'))
+		});
+		// workaround monaco-css not understanding the environment
+		self.module = undefined;
+		// workaround monaco-typescript not understanding the environment
+		self.process.browser = true;
+		require(['vs/editor/editor.main'], function() {
+      var requestEditorDiv = document.getElementsByClassName('request-editor')[0];
+      var requestEditorHidden = document.getElementsByClassName('request-editor-hidden')[0];
+      var mainButton = document.getElementsByClassName('main-submit-button')[0];
+      var mainBodyHidden = document.getElementsByClassName('main-body-hidden')[0];
+
+			var requestEditor = monaco.editor.create(requestEditorDiv, {
+				language: 'json',
+        theme : 'vs-dark',
+        automaticLayout:true
+			});
+
+      var editor = monaco.editor.create(document.getElementsByClassName('main-body')[0], {
+				language: 'json',
+        theme : 'vs-dark',
+        automaticLayout:true
+			});
+
+      mainBodyHidden.addEventListener('change', function(){
+        editor.setValue(mainBodyHidden.value);
+      });
+
+      requestEditorHidden.addEventListener('change', function(){
+        requestEditor.setValue(requestEditorHidden.value);
+      });
+
+      mainButton.addEventListener('click', function(e){
+        e.preventDefault();
+        var value = requestEditor.getValue();
+        requestEditorHidden.innerHTML = value;
+      });
+		});
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+      var headerRowTemplate = document.getElementsByClassName('header-row-template')[0];
+      var headerAddButtons = document.getElementsByClassName('header-add-button');
+      var mainForm = document.getElementsByClassName('main-submit-form')[0];
+
+      newHeaderRow = document.createElement('div');
+      newHeaderRow.setAttribute('class', 'row');
+      newHeaderRow.innerHTML = headerRowTemplate.innerHTML;
+      mainForm.appendChild(newHeaderRow);
+      updateHeaderButtonListeners();
+
+      function updateHeaderButtonListeners(){
+        for(var i = 0; i < headerAddButtons.length; i++){
+          if(i == 1 && headerAddButtons.length > 2){
+            headerAddButtons[i].parentElement.removeChild(headerAddButtons[i]);
+          }
+          if(typeof headerAddButtons[i] == 'object'){
+            headerAddButtons[i].addEventListener('click', function(e){
+              e.preventDefault();
+              newHeaderRow = document.createElement('div');
+              newHeaderRow.setAttribute('class', 'row');
+              newHeaderRow.innerHTML = headerRowTemplate.innerHTML;
+
+              for(var j = 0; j < (newHeaderRow.children.length - 1); j++){
+                newHeaderRow.children[j].children[0].children[0].value = "";
+              }
+
+              mainForm.appendChild(newHeaderRow);
+              updateHeaderButtonListeners();
+            });
+          }
+        }
+      }
+    });
+
+    document.addEventListener('keydown', function(e){
+      if(e.keyCode == 116){
+        location.reload();
+      }
+    });
+	</script>
+</html>

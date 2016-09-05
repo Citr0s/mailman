@@ -1,0 +1,96 @@
+.request-editor{
+  width:100%;
+  min-height:30vh;
+  margin-bottom:15px;
+}
+
+.main-body{
+  width:100%;
+  min-height:70vh;
+}
+.header-row-template{
+  display:none;
+}
+
+.sidebar{
+  background-color:#333;
+  position:fixed;
+  top:0;
+  bottom:0;
+  left:0;
+  width:16.66666667%;
+  color:#ccc;
+}
+
+.sidebar .header{
+  padding:15px;
+  text-align:center;
+  border-bottom:1px solid #666;
+}
+
+.sidebar .header p{
+  margin:0;
+  font-size:1.5rem;
+}
+
+.sidebar .previous-request{
+  padding:15px;
+  border-bottom:1px solid #666;
+  word-wrap: break-word;
+}
+
+.sidebar .previous-request small{
+  margin-right:5px;
+  vertical-align:top;
+  font-size:1rem;
+}
+
+.sidebar .previous-request small.get{
+  color:#3498db;
+}
+
+.sidebar .previous-request small.post{
+  color:#2ecc71;
+}
+
+.sidebar .previous-request small.put{
+  color:#9b59b6;
+}
+
+.sidebar .previous-request small.patch{
+  color:#f1c40f;
+}
+
+.sidebar .previous-request small.delete{
+  color:#e74c3c;
+}
+
+.sidebar .previous-request:hover{
+  background-color:#666;
+  cursor:pointer;
+}
+
+.response-status{
+  padding:5px;
+  margin-bottom:10px;
+  border:1px solid #666;
+  background-color:#333;
+  color:#fff;
+}
+
+
+.container{
+  padding: 0 50px;
+}
+
+span[class^="_2"] {
+  color:#2ecc71;
+}
+
+span[class^="_4"] {
+  color:#f1c40f;
+}
+
+span[class^="_5"] {
+  color:#e74c3c;
+}
