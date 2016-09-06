@@ -35,28 +35,30 @@
   padding:15px;
   border-bottom:1px solid #666;
   word-wrap: break-word;
+  font-size:1rem;
 }
 
 .sidebar .previous-request small{
   margin-right:5px;
-  vertical-align:top;
   font-size:1rem;
+  text-transform: uppercase;
+  font-weight:bold;
 }
 
 .sidebar .previous-request small.get{
-  color:#3498db;
-}
-
-.sidebar .previous-request small.post{
   color:#2ecc71;
 }
 
+.sidebar .previous-request small.post{
+  color:#f1c40f;
+}
+
 .sidebar .previous-request small.put{
-  color:#9b59b6;
+  color:#3498db;
 }
 
 .sidebar .previous-request small.patch{
-  color:#f1c40f;
+  color:#9b59b6;
 }
 
 .sidebar .previous-request small.delete{
