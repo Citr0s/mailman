@@ -25,6 +25,7 @@
   "devDependencies": {
     "electron-prebuilt": "^1.2.0",
     "monaco-editor": "^0.5.3",
-    "request": "^2.74.0"
+    "request": "^2.74.0",
+    "vue-devtools": "^2.0.4"
   }
 }

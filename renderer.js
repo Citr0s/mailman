@@ -78,22 +78,17 @@ new Vue({
   data: {
     requestType: 'get',
     requestLink: '',
-    requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b' }],
+    requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}],
     previousRequests: [],
     clicked: [false]
   },
   methods: {
     addPreviousRequest: function() {
-      var requestHeaders = [];
-      for(var i = 0; i < this.requestHeaders.length; i++){
-        requestHeaders.push({name: this.requestHeaders[i].name, value: this.requestHeaders[i].value});
-      }
       var previousRequest = {
         requestType: this.requestType,
         requestLink: this.requestLink,
-        requestHeaders: requestHeaders,
+        requestHeaders: unBind(this.requestHeaders),
       };
-      this.clicked[this.clicked.length] = false;
       this.previousRequests.push(previousRequest);
     },
     populateRequestForm: function(index) {
@@ -101,10 +96,21 @@ new Vue({
       this.requestType = selectedRequest.requestType;
       this.requestLink = selectedRequest.requestLink;
       this.requestHeaders = selectedRequest.requestHeaders;
+      this.clicked.$set(0, false);
     },
     addHeaderRow: function(index) {
-      this.clicked[index] = true;
-      this.requestHeaders.push({});
+      this.clicked.$set(index, true);
+      this.requestHeaders.$set(index + 1, {});
+    },
+    addData: function(index) {
+      this.requestHeaders.$set(index, {name: this.requestHeaders[index].name, value: this.requestHeaders[index].value});
     },
   },
-})
+  computed: {
+
+  },
+});
+
+function unBind(item){
+  return JSON.parse(JSON.stringify(item));
+}

@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8">
     <title>Mailman</title>
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="./style.css">
   </head>
@@ -16,7 +15,7 @@
             <p>{{ message }}</p>
           </div>
           <div class="previous-request-list">
-            <div class="previous-request" v-for="previousRequest in previousRequests" v-on:click="populateRequestForm($index)">
+            <div class="previous-request" v-for="previousRequest in previousRequests | orderBy '$index'" v-on:click="populateRequestForm($index)">
               <small class="{{ previousRequest.requestType }}">{{ previousRequest.requestType }}</small>
               {{ previousRequest.requestLink }}
             </div>
@@ -47,19 +46,19 @@
               <button type="submit" class="btn btn-primary main-submit-button" v-on:click="addPreviousRequest()">Submit</button>
             </div>
           </div>
-          <div class="row" v-for="requestHeader in requestHeaders" track-by="$index">
+          <div class="row" v-for="(index, requestHeader) in requestHeaders">
             <div class="col-xs-5">
               <div class="form-group">
-                <input type="text" class="form-control header-name" placeholder="header-name" value="{{ requestHeader.name }}">
+                <input type="text" class="form-control header-name" placeholder="header-name" v-model="requestHeader.name" v-on:blur="addData(index)">
               </div>
             </div>
             <div class="col-xs-5">
               <div class="form-group">
-                <input type="text" class="form-control header-value" placeholder="header-value" value="{{ requestHeader.value }}">
+                <input type="text" class="form-control header-value" placeholder="header-value" v-model="requestHeader.value"  v-on:blur="addData(index)">
               </div>
             </div>
             <div class="col-xs-2">
-              <button type="submit" class="btn btn-default header-add-button" v-on:click.prevent="addHeaderRow($index)" v-show="!clicked[$index]"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+              <button type="submit" class="btn btn-default header-add-button" v-on:click.prevent="addHeaderRow(index)" v-show="!clicked[index]"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
             </div>
           </div>
         </form>
@@ -92,9 +91,7 @@
 		require.config({
 			baseUrl: uriFromPath(path.join(__dirname, './node_modules/monaco-editor/min'))
 		});
-		// workaround monaco-css not understanding the environment
 		self.module = undefined;
-		// workaround monaco-typescript not understanding the environment
 		self.process.browser = true;
 		require(['vs/editor/editor.main'], function() {
       var requestEditorDiv = document.getElementsByClassName('request-editor')[0];

@@ -1,19 +1,26 @@
 var request = require('request');
-const electron = require('electron')
-const ipc = require('electron').ipcMain
-const app = electron.app
-const BrowserWindow = electron.BrowserWindow
-let mainWindow
+const electron = require('electron');
+const ipc = require('electron').ipcMain;
+const app = electron.app;
+const BrowserWindow = electron.BrowserWindow;
+let mainWindow;
+
 function createWindow () {
   mainWindow = new BrowserWindow({width: 1200, height: 800})
-  mainWindow.loadURL(`file://${__dirname}/index.html`)
-  mainWindow.webContents.openDevTools()
+  mainWindow.loadURL(`file://${__dirname}/index.html`);
+  mainWindow.webContents.openDevTools();
   mainWindow.on('closed', function () {
-    mainWindow = null
+    mainWindow = null;
   })
 }
 
-app.on('ready', createWindow)
+app.on('ready', function(){
+  createWindow();
+  if (process.env.NODE_ENV !== 'production'){
+    require('vue-devtools').install();
+  }
+});
+
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit()
