@@ -96,11 +96,23 @@ new Vue({
       this.requestType = selectedRequest.requestType;
       this.requestLink = selectedRequest.requestLink;
       this.requestHeaders = selectedRequest.requestHeaders;
-      this.clicked.$set(0, false);
+
+      for(var i = 0; i < this.clicked.length; i++){
+        this.clicked.$set(i, true);
+      }
+
+      this.clicked.$set(this.requestHeaders.length - 1, false);
     },
-    addHeaderRow: function(index) {
-      this.clicked.$set(index, true);
-      this.requestHeaders.$set(index + 1, {});
+    toggleHeaderRow: function(index) {
+      console.log(this.clicked[index], this.requestHeaders.length, index);
+      if(!this.clicked[index]){
+          this.clicked.$set(index, true);
+          this.requestHeaders.$set(index + 1, {});
+      }else{
+        this.clicked.$set(index, false);
+        this.requestHeaders.$remove(this.requestHeaders[index]);
+      }
+
     },
     addData: function(index) {
       this.requestHeaders.$set(index, {name: this.requestHeaders[index].name, value: this.requestHeaders[index].value});
