@@ -30,6 +30,7 @@
   color:#fff;
   border: none;
   background-color: transparent;
+  box-shadow: none;
 }
 
 
@@ -38,12 +39,32 @@
   font-size:1.5rem;
 }
 
+.sidebar .previous-request.open{
+  box-shadow:0 5px 5px rgba(0, 0, 0, 0.2);
+}
 .sidebar .previous-request{
   position: relative;
   padding:15px;
   border-bottom:1px solid #666;
   word-wrap: break-word;
   font-size:1rem;
+}
+
+.sidebar .previous-request big{
+  text-transform: uppercase;
+  font-weight:bold;
+}
+
+.sidebar .previous-request big small{
+  text-transform: lowercase;
+  font-weight:normal;
+  color:#999;
+  margin-left:5px;
+}
+
+
+.sidebar .previous-request big .glyphicon{
+  margin-right:10px;
 }
 
 .sidebar .previous-request small{

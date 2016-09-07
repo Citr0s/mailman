@@ -79,6 +79,13 @@ mainButton.addEventListener('click', function(e){
 ipc.on('loadSavedRequests', function (e, requests) {
   vue.savedRequests = JSON.parse(requests);
   vue.sidebarItems = vue.savedRequests;
+
+  var folderObject = {
+    opened: false,
+    items: vue.sidebarItems,
+  };
+
+  vue.sidebarFolders.push(folderObject);
 });
 
 var vue = new Vue({
@@ -92,6 +99,7 @@ var vue = new Vue({
     savedRequests: [],
     previousRequests: [],
     sidebarItems: [],
+    sidebarFolders: [{opened: false, items: []}],
     clicked: [false],
     active: [true]
   },
@@ -263,10 +271,38 @@ var vue = new Vue({
     },
     loadSidebarData: function() {
       if(this.sidebarHeader == 'history'){
+        this.sidebarFolders = [];
         this.sidebarItems = this.previousRequests;
         return;
       }
+
       this.sidebarItems = this.savedRequests;
+
+      this.sidebarFolders = [];
+
+      var folderObject = {
+        opened: false,
+        items: this.sidebarItems,
+      };
+
+      this.sidebarFolders.push(folderObject);
+    },
+    toggleFolder: function(index) {
+      var saveableFolderObject = this.sidebarFolders[index];
+
+      if(saveableFolderObject.opened){
+        saveableFolderObject.opened = false;
+      }else{
+        saveableFolderObject.opened = true;
+      }
+
+      this.sidebarFolders.$set(index, saveableFolderObject);
+    },
+    shouldDisplay: function(index) {
+      if(typeof this.sidebarFolders[0] === 'undefined'){
+        return true;
+      }
+      return this.sidebarFolders[0].opened;
     },
   },
   computed: {

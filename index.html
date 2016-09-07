@@ -17,7 +17,10 @@
             </select>
           </div>
           <div class="previous-request-list">
-            <div class="previous-request row" v-for="(index, sidebarItem) in sidebarItems" v-on:click="populateRequestForm($index)">
+            <div :class="['previous-request', sidebarFolder.opened ? 'open' : '']" v-for="(index, sidebarFolder) in sidebarFolders" v-on:click="toggleFolder($index)">
+              <div><big><span :class="['glyphicon', sidebarFolder.opened ? 'glyphicon-folder-open' : 'glyphicon-folder-close']" aria-hidden="true"></span>Other<small>({{ sidebarFolder.items.length }} items)</small></big></div>
+            </div>
+            <div class="previous-request row" v-for="(index, sidebarItem) in sidebarItems" v-on:click="populateRequestForm($index)" v-show="shouldDisplay(index)">
               <div class="col-xs-10 no-padding-right">
                 <small class="{{ sidebarItem.requestType }}">{{ sidebarItem.requestType }}</small>
                 {{ sidebarItem.requestLink }}
