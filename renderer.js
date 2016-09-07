@@ -30,7 +30,7 @@ mainButton.addEventListener('click', function(e){
   statusDiv.innerHTML = "Waiting for response...";
   setTimeout(function(){
     var headers = {};
-    for(var i = 1; i < headerNames.length; i++){
+    for(var i = 0; i < headerNames.length; i++){
       if(headerNames[i].value.length !== 0 || headerValues[i].value.length !== 0){
         headers[headerNames[i].value] = headerValues[i].value;
       }
@@ -158,11 +158,14 @@ var vue = new Vue({
       if(!exists){
         var folderIndex = 0;
         for(var i = 0; i < this.sidebar.folders.length; i++){
-          if(this.sidebar.folders[i].name == this.requestFolder){
+          if(this.sidebar.folders[i].name.toLowerCase() == this.requestFolder.toLowerCase()){
             folderIndex = i;
-            continue;
+            break;
           }
-          folderIndex = i + 1;
+        }
+
+        if(folderIndex === 0){
+          folderIndex = this.sidebar.folders.length;
         }
 
         if(typeof this.sidebar.folders[folderIndex] === 'undefined'){
