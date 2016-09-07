@@ -76,11 +76,13 @@ mainButton.addEventListener('click', function(e){
 new Vue({
   el: '#app',
   data: {
+    tabs: [{requestLink: 'http://api.football-data.org/v1/soccerseasons/424/'}],
     requestType: 'get',
-    requestLink: '',
+    requestLink: 'http://api.football-data.org/v1/soccerseasons/424/',
     requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}],
     previousRequests: [],
-    clicked: [false]
+    clicked: [false],
+    active: [true]
   },
   methods: {
     addPreviousRequest: function() {
@@ -93,23 +95,37 @@ new Vue({
     },
     populateRequestForm: function(index) {
       var selectedRequest = this.previousRequests[index];
-      this.requestType = selectedRequest.requestType;
-      this.requestLink = selectedRequest.requestLink;
-      this.requestHeaders = selectedRequest.requestHeaders;
+
+      if(typeof selectedRequest !== 'undefined'){
+        this.requestType = selectedRequest.requestType;
+        this.requestLink = selectedRequest.requestLink;
+        this.requestHeaders = selectedRequest.requestHeaders;
+        this.tabs.$set(index, selectedRequest);
+      }
 
       for(var i = 0; i < this.clicked.length; i++){
         this.clicked.$set(i, true);
       }
 
+      for(var i = 0; i < this.active.length; i++){
+        this.active.$set(i, false);
+      }
+
+      this.active.$set(index, true);
       this.clicked.$set(this.requestHeaders.length - 1, false);
     },
     toggleHeaderRow: function(index) {
-      console.log(this.clicked[index], this.requestHeaders.length, index);
       if(!this.clicked[index]){
           this.clicked.$set(index, true);
           this.requestHeaders.$set(index + 1, {});
       }else{
-        this.clicked.$set(index, false);
+        var currentClicked = [];
+        for(var i = 0; i < this.clicked.length; i++){
+          if(this.clicked[i] === true){
+            currentClicked.push(this.clicked[i]);
+          }
+        }
+        this.clicked.$set(currentClicked.length - 1, false);
         this.requestHeaders.$remove(this.requestHeaders[index]);
       }
 
@@ -117,6 +133,15 @@ new Vue({
     addData: function(index) {
       this.requestHeaders.$set(index, {name: this.requestHeaders[index].name, value: this.requestHeaders[index].value});
     },
+    removeTab: function(index){
+      this.tabs.$remove(this.tabs[index]);
+    },
+    addTab: function(){
+      this.requestType = 'get';
+      this.requestLink = '';
+      this.requestHeaders = [{}];
+      this.tabs.push({requestLink: this.requestLink});
+    }
   },
   computed: {
 

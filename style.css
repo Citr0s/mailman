@@ -94,3 +94,25 @@ span[class^="_4"] {
 span[class^="_5"] {
   color:#e74c3c;
 }
+
+.nav-tabs{
+  margin-bottom:15px;
+}
+
+.tab a{
+  transition: .2s ease-in-out;
+}
+
+.tab a:hover{
+  background-color:#f3f3f3 !important;
+}
+
+.tab.plus a{
+  background-color:#eee !important;
+}
+
+.tab.plus a:hover{
+  border-top:1px solid #999 !important;
+  border-left:1px solid #999 !important;
+  border-right:1px solid #999 !important;
+}

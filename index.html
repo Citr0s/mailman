@@ -24,6 +24,14 @@
       </div>
       <div class="col-xs-10 container">
         <h1>Mailman</h1>
+        <ul class="nav nav-tabs" role="tablist">
+          <li v-for="(index, tab) in tabs" role="presentation" :class="['tab', active[index] ? 'active' : '']" v-on:click="populateRequestForm(index)">
+            <a role="tab" data-toggle="tab">{{ tab.requestLink }} <span class="glyphicon glyphicon-remove" aria-hidden="true" v-on:click="removeTab(index)"></span></a>
+          </li>
+          <li role="presentation" class="active tab plus" v-on:click="addTab()">
+            <a role="tab" data-toggle="tab"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+          </li>
+        </ul>
         <form class="main-submit-form">
           <div class="row">
             <div class="col-xs-2">
@@ -39,7 +47,7 @@
             </div>
             <div class="col-xs-8">
               <div class="form-group">
-                <input type="text" class="form-control main-request-link" v-model="requestLink" placeholder="link" value="http://api.football-data.org/v1/soccerseasons/424/">
+                <input type="text" class="form-control main-request-link" v-model="requestLink" placeholder="link">
               </div>
             </div>
             <div class="col-xs-2">
