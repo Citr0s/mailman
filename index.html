@@ -15,9 +15,12 @@
             <p>{{ message }}</p>
           </div>
           <div class="previous-request-list">
-            <div class="previous-request" v-for="previousRequest in previousRequests" v-on:click="populateRequestForm($index)">
-              <small class="{{ previousRequest.requestType }}">{{ previousRequest.requestType }}</small>
-              {{ previousRequest.requestLink }}
+            <div class="previous-request row" v-for="(index, previousRequest) in previousRequests" v-on:click="populateRequestForm($index)">
+              <div class="col-xs-10 no-padding-right">
+                <small class="{{ previousRequest.requestType }}">{{ previousRequest.requestType }}</small>
+                {{ previousRequest.requestLink }}
+              </div>
+              <div class="col-xs-2 no-padding removePreviousRequest glyphicon glyphicon-remove" aria-hidden="true" v-on:click="removePreviousRequest(index)"></div>
             </div>
           </div>
         </div>

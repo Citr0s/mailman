@@ -32,6 +32,7 @@
 }
 
 .sidebar .previous-request{
+  position: relative;
   padding:15px;
   border-bottom:1px solid #666;
   word-wrap: break-word;
@@ -100,6 +101,7 @@ span[class^="_5"] {
 }
 
 .tab a{
+  color:#ccc;
   transition: .2s ease-in-out;
 }
 
@@ -115,4 +117,19 @@ span[class^="_5"] {
   border-top:1px solid #999 !important;
   border-left:1px solid #999 !important;
   border-right:1px solid #999 !important;
+}
+
+.removePreviousRequest{
+  position: absolute;
+  right: 5px;
+  top: 10px;
+  color:#e74c3c;
+}
+
+.no-padding{
+  padding-left:0;
+  padding-right:0;
+}
+.no-padding-right{
+  padding-right:0;
 }

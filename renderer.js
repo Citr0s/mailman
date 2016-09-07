@@ -46,7 +46,6 @@ function updateHeaderButtonListeners(headerAddButtons, newHeaderRow, headerRowTe
 
 mainButton.addEventListener('click', function(e){
   statusDiv.innerHTML = "Waiting for response...";
-   ipc.send('exampleEvent')
   setTimeout(function(){
     var headers = {};
     for(var i = 1; i < headerNames.length; i++){
@@ -76,7 +75,6 @@ mainButton.addEventListener('click', function(e){
     });
   }, 1);
 });
-
 
 ipc.on('loadSavedRequests', function (e, requests) {
   vue.previousRequests = JSON.parse(requests);
@@ -181,7 +179,6 @@ var vue = new Vue({
         this.clicked.$set(currentClicked.length - 1, false);
         this.requestHeaders.$remove(this.requestHeaders[index]);
       }
-
     },
     addData: function(index) {
       this.requestHeaders.$set(index, {name: this.requestHeaders[index].name, value: this.requestHeaders[index].value});
@@ -192,10 +189,13 @@ var vue = new Vue({
           this.tabs.$set(i, {requestType: this.requestType, requestLink: this.requestLink, requestHeaders: this.requestHeaders});
         }
       }
-
     },
-    removeTab: function(index){
+    removeTab: function(index) {
       this.tabs.$remove(this.tabs[index]);
+    },
+    removePreviousRequest: function(index) {
+      this.previousRequests.$remove(this.previousRequests[index]);
+      ipc.send('saveRequests', this.previousRequests);
     },
     addTab: function(request = null){
       if(request === null){
@@ -205,7 +205,6 @@ var vue = new Vue({
           requestHeaders: [{name: '', value: ''}],
         }
       }
-
       this.tabs.push(request);
     }
   },
