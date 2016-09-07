@@ -78,7 +78,7 @@ var vue = new Vue({
     requestType: 'get',
     requestLink: 'http://api.football-data.org/v1/soccerseasons/424/',
     requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}],
-    requestFolder: {},
+    requestFolder: '',
     savedRequests: [],
     historicRequests: {
       folders: [{
@@ -87,7 +87,9 @@ var vue = new Vue({
         savedRequests:[],
       }]
     },
-    sidebar: {},
+    sidebar: {
+      folders: [],
+    },
     clicked: [false],
     active: [true]
   },
@@ -109,6 +111,10 @@ var vue = new Vue({
         if(JSON.stringify(currentRequest) == JSON.stringify(request)){
           exists = true;
         }
+      }
+
+      if(typeof this.sidebar.folders === 'undefined'){
+        return;
       }
 
       if(!exists){
@@ -145,9 +151,30 @@ var vue = new Vue({
         }
       }
 
+      if(this.requestFolder == ''){
+        return;
+      }
+
       if(!exists){
-        this.sidebar.folders[this.requestFolder].savedRequests.push(saveRequest);
-        ipc.send('saveRequests', this.savedRequests);
+        var folderIndex = 0;
+        for(var i = 0; i < this.sidebar.folders.length; i++){
+          if(this.sidebar.folders[i].name == this.requestFolder){
+            folderIndex = i;
+            continue;
+          }
+          folderIndex = i + 1;
+        }
+
+        if(typeof this.sidebar.folders[folderIndex] === 'undefined'){
+            this.sidebar.folders[folderIndex] = {
+              name: this.requestFolder,
+              opened: false,
+              savedRequests: [],
+            };
+        }
+
+        this.sidebar.folders[folderIndex].savedRequests.push(saveRequest);
+        ipc.send('saveRequests', this.sidebar);
       }
 
       var count = 0;
@@ -169,7 +196,7 @@ var vue = new Vue({
         this.requestType = selectedRequest.requestType;
         this.requestLink = selectedRequest.requestLink;
         this.requestHeaders = selectedRequest.requestHeaders;
-        this.requestFolder = {id: folderIndex, name: this.sidebar.folders[folderIndex].name};
+        this.requestFolder = this.sidebar.folders[folderIndex].name;
       }
 
       for(var i = 0; i < this.clicked.length; i++){
@@ -243,9 +270,9 @@ var vue = new Vue({
     removeTab: function(index) {
       this.tabs.$remove(this.tabs[index]);
     },
-    removePreviousRequest: function(index) {
-      this.historicRequests.$remove(this.historicRequests[index]);
-      ipc.send('saveRequests', this.savedRequests);
+    removePreviousRequest: function(folderIndex, itemIndex) {
+      this.sidebar.folders[folderIndex].savedRequests.$remove(this.sidebar.folders[folderIndex].savedRequests[itemIndex]);
+      ipc.send('saveRequests', this.sidebar);
     },
     addTab: function(request = null){
       if(request === null){
@@ -274,6 +301,7 @@ var vue = new Vue({
       }
 
       this.sidebar.folders.$set(index, folder);
+      ipc.send('saveRequests', this.sidebar);
     },
     shouldDisplay: function(index) {
       if(typeof this.sidebar.folders[index] === 'undefined'){
