@@ -98,8 +98,23 @@ var vue = new Vue({
         requestLink: this.requestLink,
         requestHeaders: unBind(this.requestHeaders),
       };
-      this.previousRequests.push(previousRequest);
-      ipc.send('saveRequests', this.previousRequests);
+
+      var exists = false;
+      for(var i = 0; i < this.previousRequests.length; i++){
+        var currentRequest = {
+          requestType: this.previousRequests[i].requestType,
+          requestLink: this.previousRequests[i].requestLink,
+          requestHeaders: unBind(this.previousRequests[i].requestHeaders),
+        };
+        if(JSON.stringify(currentRequest) == JSON.stringify(previousRequest)){
+          exists = true;
+        }
+      }
+
+      if(!exists){
+        this.previousRequests.push(previousRequest);
+        ipc.send('saveRequests', this.previousRequests);
+      }
 
       var count = 0;
       for(var i = 0; i < this.tabs.length; i++){
