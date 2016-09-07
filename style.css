@@ -26,6 +26,13 @@
   border-bottom:1px solid #666;
 }
 
+.sidebar-header{
+  color:#fff;
+  border: none;
+  background-color: transparent;
+}
+
+
 .sidebar .header p{
   margin:0;
   font-size:1.5rem;

@@ -11,14 +11,16 @@
       <div class="col-xs-2">
         <div class="sidebar">
           <div class="header">
-            <p>History</p>
-            <p>{{ message }}</p>
+            <select class="form-control sidebar-header" v-model="sidebarHeader" v-on:change="loadSidebarData()">
+              <option value="saved" selected="selected">Saved</option>
+              <option value="history">History</option>
+            </select>
           </div>
           <div class="previous-request-list">
-            <div class="previous-request row" v-for="(index, previousRequest) in previousRequests" v-on:click="populateRequestForm($index)">
+            <div class="previous-request row" v-for="(index, sidebarItem) in sidebarItems" v-on:click="populateRequestForm($index)">
               <div class="col-xs-10 no-padding-right">
-                <small class="{{ previousRequest.requestType }}">{{ previousRequest.requestType }}</small>
-                {{ previousRequest.requestLink }}
+                <small class="{{ sidebarItem.requestType }}">{{ sidebarItem.requestType }}</small>
+                {{ sidebarItem.requestLink }}
               </div>
               <div class="col-xs-2 no-padding removePreviousRequest glyphicon glyphicon-remove" aria-hidden="true" v-on:click="removePreviousRequest(index)"></div>
             </div>
@@ -48,13 +50,14 @@
                 </select>
               </div>
             </div>
-            <div class="col-xs-8">
+            <div class="col-xs-7">
               <div class="form-group">
                 <input type="text" class="form-control main-request-link" v-model="requestLink" placeholder="link" v-on:blur="addOtherData()">
               </div>
             </div>
-            <div class="col-xs-2">
-              <button type="submit" class="btn btn-primary main-submit-button" v-on:click="addPreviousRequest()">Submit</button>
+            <div class="col-xs-3">
+              <button type="submit" class="btn btn-primary main-submit-button" v-on:click.prevent="addPreviousRequest()">Submit</button>
+              <button type="submit" class="btn btn-default main-submit-button" v-on:click.prevent="addSavedRequest()">Save</button>
             </div>
           </div>
           <div class="row" v-for="(index, requestHeader) in requestHeaders">
@@ -113,13 +116,15 @@
 			var requestEditor = monaco.editor.create(requestEditorDiv, {
 				language: 'json',
         theme : 'vs-dark',
-        automaticLayout:true
+        automaticLayout:true,
+        value: '{}'
 			});
 
       var editor = monaco.editor.create(document.getElementsByClassName('main-body')[0], {
 				language: 'json',
         theme : 'vs-dark',
-        automaticLayout:true
+        automaticLayout:true,
+        value: '{}'
 			});
 
       mainBodyHidden.addEventListener('change', function(){

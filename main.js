@@ -69,7 +69,7 @@ ipc.on('makeRequest', function (e, requestDetails) {
 
 ipc.on('saveRequests', function (e, requests) {
   var filepath = storageFilePath;
-    var content = JSON.stringify(requests);
+  var content = JSON.stringify(requests);
 
   fs.writeFile(filepath, content, function (err) {
     var message = "";

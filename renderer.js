@@ -77,17 +77,21 @@ mainButton.addEventListener('click', function(e){
 });
 
 ipc.on('loadSavedRequests', function (e, requests) {
-  vue.previousRequests = JSON.parse(requests);
+  vue.savedRequests = JSON.parse(requests);
+  vue.sidebarItems = vue.savedRequests;
 });
 
 var vue = new Vue({
   el: '#app',
   data: {
+    sidebarHeader: '',
     tabs: [{requestType: 'get', requestLink: 'http://api.football-data.org/v1/soccerseasons/424/', requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}]}],
     requestType: 'get',
     requestLink: 'http://api.football-data.org/v1/soccerseasons/424/',
     requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}],
+    savedRequests: [],
     previousRequests: [],
+    sidebarItems: [],
     clicked: [false],
     active: [true]
   },
@@ -113,13 +117,12 @@ var vue = new Vue({
 
       if(!exists){
         this.previousRequests.push(previousRequest);
-        ipc.send('saveRequests', this.previousRequests);
+        ipc.send('saveRequests', this.savedRequests);
       }
 
       var count = 0;
       for(var i = 0; i < this.tabs.length; i++){
         if(this.tabs[i].requestLink === this.requestLink){
-          this.tabs.$set(i, previousRequest);
           count++;
         }
       }
@@ -128,8 +131,44 @@ var vue = new Vue({
         this.tabs.push(previousRequest);
       }
     },
+    addSavedRequest: function(){
+      var saveRequest = {
+        requestType: this.requestType,
+        requestLink: this.requestLink,
+        requestHeaders: unBind(this.requestHeaders),
+      };
+
+      var exists = false;
+      for(var i = 0; i < this.savedRequests.length; i++){
+        var currentRequest = {
+          requestType: this.savedRequests[i].requestType,
+          requestLink: this.savedRequests[i].requestLink,
+          requestHeaders: unBind(this.savedRequests[i].requestHeaders),
+        };
+        if(JSON.stringify(currentRequest) == JSON.stringify(saveRequest)){
+          exists = true;
+        }
+      }
+
+      if(!exists){
+        this.savedRequests.push(saveRequest);
+        ipc.send('saveRequests', this.savedRequests);
+      }
+
+      var count = 0;
+      for(var i = 0; i < this.tabs.length; i++){
+        if(this.tabs[i].requestLink === this.requestLink){
+          this.tabs.$set(i, saveRequest);
+          count++;
+        }
+      }
+
+      if(count === 0){
+        this.tabs.push(currentRequest);
+      }
+    },
     populateRequestForm: function(index) {
-      var selectedRequest = this.previousRequests[index];
+      var selectedRequest = this.sidebarItems[index];
 
       if(typeof selectedRequest !== 'undefined'){
         this.requestType = selectedRequest.requestType;
@@ -210,7 +249,7 @@ var vue = new Vue({
     },
     removePreviousRequest: function(index) {
       this.previousRequests.$remove(this.previousRequests[index]);
-      ipc.send('saveRequests', this.previousRequests);
+      ipc.send('saveRequests', this.savedRequests);
     },
     addTab: function(request = null){
       if(request === null){
@@ -221,7 +260,14 @@ var vue = new Vue({
         }
       }
       this.tabs.push(request);
-    }
+    },
+    loadSidebarData: function() {
+      if(this.sidebarHeader == 'history'){
+        this.sidebarItems = this.previousRequests;
+        return;
+      }
+      this.sidebarItems = this.savedRequests;
+    },
   },
   computed: {
 
