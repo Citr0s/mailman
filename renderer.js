@@ -76,7 +76,7 @@ mainButton.addEventListener('click', function(e){
 new Vue({
   el: '#app',
   data: {
-    tabs: [{requestLink: 'http://api.football-data.org/v1/soccerseasons/424/'}],
+    tabs: [{requestType: 'get', requestLink: 'http://api.football-data.org/v1/soccerseasons/424/', requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}]}],
     requestType: 'get',
     requestLink: 'http://api.football-data.org/v1/soccerseasons/424/',
     requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}],
@@ -92,6 +92,18 @@ new Vue({
         requestHeaders: unBind(this.requestHeaders),
       };
       this.previousRequests.push(previousRequest);
+
+      var count = 0;
+      for(var i = 0; i < this.tabs.length; i++){
+        if(this.tabs[i].requestLink === this.requestLink){
+          this.tabs.$set(i, previousRequest);
+          count++;
+        }
+      }
+
+      if(count === 0){
+        this.tabs.push(previousRequest);
+      }
     },
     populateRequestForm: function(index) {
       var selectedRequest = this.previousRequests[index];
@@ -100,7 +112,38 @@ new Vue({
         this.requestType = selectedRequest.requestType;
         this.requestLink = selectedRequest.requestLink;
         this.requestHeaders = selectedRequest.requestHeaders;
-        this.tabs.$set(index, selectedRequest);
+      }
+
+      for(var i = 0; i < this.clicked.length; i++){
+        this.clicked.$set(i, true);
+      }
+
+      for(var i = 0; i < this.active.length; i++){
+        this.active.$set(i, false);
+      }
+
+      var count = 0;
+      for(var i = 0; i < this.tabs.length; i++){
+        if(this.tabs[i].requestLink === selectedRequest.requestLink){
+          this.active.$set(index, true);
+          count++;
+        }
+      }
+
+      if(count === 0){
+        this.addTab(selectedRequest);
+      }
+
+      this.clicked.$set(this.requestHeaders.length - 1, false);
+    },
+    populateRequestFormUsingTabs: function(index) {
+      var selectedTab = this.tabs[index];
+
+      if(typeof selectedTab !== 'undefined'){
+        this.requestType = selectedTab.requestType;
+        this.requestLink = selectedTab.requestLink;
+        this.requestHeaders = selectedTab.requestHeaders;
+        this.tabs.$set(index, selectedTab);
       }
 
       for(var i = 0; i < this.clicked.length; i++){
@@ -133,14 +176,27 @@ new Vue({
     addData: function(index) {
       this.requestHeaders.$set(index, {name: this.requestHeaders[index].name, value: this.requestHeaders[index].value});
     },
+    addOtherData: function() {
+      for(var i  = 0; i < this.active.length; i++){
+        if(this.active[i] === true){
+          this.tabs.$set(i, {requestType: this.requestType, requestLink: this.requestLink, requestHeaders: this.requestHeaders});
+        }
+      }
+
+    },
     removeTab: function(index){
       this.tabs.$remove(this.tabs[index]);
     },
-    addTab: function(){
-      this.requestType = 'get';
-      this.requestLink = '';
-      this.requestHeaders = [{}];
-      this.tabs.push({requestLink: this.requestLink});
+    addTab: function(request = null){
+      if(request === null){
+        var request = {
+          requestType: 'get',
+          requestLink: 'New Tab',
+          requestHeaders: [{name: '', value: ''}],
+        }
+      }
+
+      this.tabs.push(request);
     }
   },
   computed: {

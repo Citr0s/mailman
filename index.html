@@ -15,7 +15,7 @@
             <p>{{ message }}</p>
           </div>
           <div class="previous-request-list">
-            <div class="previous-request" v-for="previousRequest in previousRequests | orderBy '$index'" v-on:click="populateRequestForm($index)">
+            <div class="previous-request" v-for="previousRequest in previousRequests" v-on:click="populateRequestForm($index)">
               <small class="{{ previousRequest.requestType }}">{{ previousRequest.requestType }}</small>
               {{ previousRequest.requestLink }}
             </div>
@@ -25,7 +25,7 @@
       <div class="col-xs-10 container">
         <h1>Mailman</h1>
         <ul class="nav nav-tabs" role="tablist">
-          <li v-for="(index, tab) in tabs" role="presentation" :class="['tab', active[index] ? 'active' : '']" v-on:click="populateRequestForm(index)">
+          <li v-for="(index, tab) in tabs" role="presentation" :class="['tab', active[index] ? 'active' : '']" v-on:click="populateRequestFormUsingTabs(index)">
             <a role="tab" data-toggle="tab">{{ tab.requestLink }} <span class="glyphicon glyphicon-remove" aria-hidden="true" v-on:click="removeTab(index)"></span></a>
           </li>
           <li role="presentation" class="active tab plus" v-on:click="addTab()">
@@ -36,7 +36,7 @@
           <div class="row">
             <div class="col-xs-2">
               <div class="form-group">
-                <select name="request" class="form-control main-request-type" v-model="requestType">
+                <select name="request" class="form-control main-request-type" v-model="requestType" v-on:blur="addOtherData()">
                   <option value="get">GET</option>
                   <option value="post">POST</option>
                   <option value="put">PUT</option>
@@ -47,7 +47,7 @@
             </div>
             <div class="col-xs-8">
               <div class="form-group">
-                <input type="text" class="form-control main-request-link" v-model="requestLink" placeholder="link">
+                <input type="text" class="form-control main-request-link" v-model="requestLink" placeholder="link" v-on:blur="addOtherData()">
               </div>
             </div>
             <div class="col-xs-2">
