@@ -1,7 +1,7 @@
 {
-  "name": "electron-quick-start",
+  "name": "Mailman",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "A minimal api call app",
   "main": "main.js",
   "scripts": {
     "start": "electron ."

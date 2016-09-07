@@ -17,6 +17,10 @@ function triggerEvent(eventType, element){
   element.dispatchEvent(evt);
 }
 
+document.addEventListener("DOMContentLoaded", function() {
+  ipc.send('requestSavedFile', 'ping');
+});
+
 function updateHeaderButtonListeners(headerAddButtons, newHeaderRow, headerRowTemplate, mainForm){
   for(var i = 0; i < headerAddButtons.length; i++){
     if(i == 1 && headerAddButtons.length > 2){
@@ -73,7 +77,12 @@ mainButton.addEventListener('click', function(e){
   }, 1);
 });
 
-new Vue({
+
+ipc.on('loadSavedRequests', function (e, requests) {
+  vue.previousRequests = JSON.parse(requests);
+});
+
+var vue = new Vue({
   el: '#app',
   data: {
     tabs: [{requestType: 'get', requestLink: 'http://api.football-data.org/v1/soccerseasons/424/', requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}]}],
@@ -92,6 +101,7 @@ new Vue({
         requestHeaders: unBind(this.requestHeaders),
       };
       this.previousRequests.push(previousRequest);
+      ipc.send('saveRequests', this.previousRequests);
 
       var count = 0;
       for(var i = 0; i < this.tabs.length; i++){

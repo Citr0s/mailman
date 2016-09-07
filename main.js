@@ -4,6 +4,8 @@ const ipc = require('electron').ipcMain;
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 let mainWindow;
+var storageFilePath = 'storage.json';
+var fs = require('fs');
 
 function createWindow () {
   mainWindow = new BrowserWindow({width: 1200, height: 800})
@@ -14,11 +16,22 @@ function createWindow () {
   })
 }
 
-app.on('ready', function(){
+app.on('ready', function(e){
   createWindow();
   if (process.env.NODE_ENV !== 'production'){
     require('vue-devtools').install();
   }
+});
+
+ipc.on('requestSavedFile', function (e, arg) {
+    fs.readFile(storageFilePath, 'utf-8', function (err, data) {
+      if(err){
+        console.log("An error ocurred reading the file: " + err.message);
+        return;
+      }
+      console.log("The file content is: " + data);
+      e.sender.send('loadSavedRequests', data);
+    });
 });
 
 app.on('window-all-closed', function () {
@@ -52,4 +65,22 @@ ipc.on('makeRequest', function (e, requestDetails) {
     e.sender.send('makeResponse', response);
     return response;
   });
+});
+
+ipc.on('saveRequests', function (e, requests) {
+  var filepath = storageFilePath;
+  var content = JSON.stringify(requests);
+
+  fs.writeFile(filepath, content, function (err) {
+    var message = "";
+    if(err){
+      message = "An error ocurred while updating the file " + err.message;
+      console.log(message);
+      e.sender.send('saveRequestsResponse', message);
+      return;
+    }
+    message = "Requests have been successfully saved.";
+    console.log(message);
+    e.sender.send('saveRequestsResponse', message);
+   });
 })
