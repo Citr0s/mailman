@@ -121,9 +121,10 @@ span[class^="_5"] {
 
 .removePreviousRequest{
   position: absolute;
-  right: 5px;
+  right: 25px;
   top: 10px;
   color:#e74c3c;
+  width:auto;
 }
 
 .no-padding{
