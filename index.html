@@ -16,16 +16,16 @@
               <option value="history">History</option>
             </select>
           </div>
-          <div class="previous-request-list">
-            <div :class="['previous-request', sidebarFolder.opened ? 'open' : '']" v-for="(index, sidebarFolder) in sidebarFolders" v-on:click="toggleFolder($index)">
-              <div><big><span :class="['glyphicon', sidebarFolder.opened ? 'glyphicon-folder-open' : 'glyphicon-folder-close']" aria-hidden="true"></span>Other<small>({{ sidebarFolder.items.length }} items)</small></big></div>
+          <div class="previous-request-list" v-for="(folderIndex, folder) in sidebar.folders">
+            <div :class="['previous-request', folder.opened ? 'open' : '']" v-on:click="toggleFolder(folderIndex)">
+              <div><big><span :class="['glyphicon', folder.opened ? 'glyphicon-folder-open' : 'glyphicon-folder-close']" aria-hidden="true"></span>{{ folder.name || 'Default' }}<small>({{ folder.savedRequests.length }} items)</small></big></div>
             </div>
-            <div class="previous-request row" v-for="(index, sidebarItem) in sidebarItems" v-on:click="populateRequestForm($index)" v-show="shouldDisplay(index)">
+            <div class="previous-request row" v-for="(itemIndex, request) in folder.savedRequests" v-on:click="populateRequestForm(folderIndex, itemIndex)" v-show="shouldDisplay(folderIndex)">
               <div class="col-xs-10 no-padding-right">
-                <small class="{{ sidebarItem.requestType }}">{{ sidebarItem.requestType }}</small>
-                {{ sidebarItem.requestLink }}
+                <small class="{{ request.requestType }}">{{ request.requestType }}</small>
+                {{ request.requestLink }}
               </div>
-              <div class="col-xs-2 no-padding removePreviousRequest glyphicon glyphicon-remove" aria-hidden="true" v-on:click="removePreviousRequest(index)"></div>
+              <div class="col-xs-2 no-padding removePreviousRequest glyphicon glyphicon-remove" aria-hidden="true" v-on:click="removePreviousRequest(itemIndex)"></div>
             </div>
           </div>
         </div>
@@ -57,10 +57,17 @@
               <div class="form-group">
                 <input type="text" class="form-control main-request-link" v-model="requestLink" placeholder="link" v-on:blur="addOtherData()">
               </div>
+              <div class="form-group">
+                <select name="folder" class="form-control main-request-type" v-model="requestFolder">
+                  <option value="{{ requestFolder.id || '0' }}" selected="selected">{{ requestFolder.name || 'Select a folder' }}</option>
+                  <option value="0">---</option>
+                  <option v-for="(index, folder) in sidebar.folders" value="{{ index }}">{{ folder.name }}</option>
+                </select>
+              </div>
             </div>
             <div class="col-xs-3">
-              <button type="submit" class="btn btn-primary main-submit-button" v-on:click.prevent="addPreviousRequest()">Submit</button>
-              <button type="submit" class="btn btn-default main-submit-button" v-on:click.prevent="addSavedRequest()">Save</button>
+              <button type="submit" class="btn btn-primary main-submit-button" v-on:click.prevent="addHistoryRequest()">Submit</button>
+              <button type="submit" class="btn btn-default main-save-button" v-on:click.prevent="addSavedRequest()">Save</button>
             </div>
           </div>
           <div class="row" v-for="(index, requestHeader) in requestHeaders">

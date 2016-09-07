@@ -2,6 +2,7 @@ const ipc = require('electron').ipcRenderer;
 var mainRequestType = document.getElementsByClassName('main-request-type')[0];
 var mainRequestLink = document.getElementsByClassName('main-request-link')[0];
 var mainButton = document.getElementsByClassName('main-submit-button')[0];
+var saveButton = document.getElementsByClassName('main-save-button')[0];
 var mainBodyHidden = document.getElementsByClassName('main-body-hidden')[0];
 var headerNames = document.getElementsByClassName('header-name');
 var headerValues = document.getElementsByClassName('header-value');
@@ -21,28 +22,9 @@ document.addEventListener("DOMContentLoaded", function() {
   ipc.send('requestSavedFile', 'ping');
 });
 
-function updateHeaderButtonListeners(headerAddButtons, newHeaderRow, headerRowTemplate, mainForm){
-  for(var i = 0; i < headerAddButtons.length; i++){
-    if(i == 1 && headerAddButtons.length > 2){
-      headerAddButtons[i].parentElement.removeChild(headerAddButtons[i]);
-    }
-    if(typeof headerAddButtons[i] == 'object'){
-      headerAddButtons[i].addEventListener('click', function(e){
-        e.preventDefault();
-        newHeaderRow = document.createElement('div');
-        newHeaderRow.setAttribute('class', 'row');
-        newHeaderRow.innerHTML = headerRowTemplate.innerHTML;
+saveButton.addEventListener('click', function(e){
 
-        for(var j = 0; j < (newHeaderRow.children.length - 1); j++){
-          newHeaderRow.children[j].children[0].children[0].value = "";
-        }
-
-        mainForm.appendChild(newHeaderRow);
-        updateHeaderButtonListeners();
-      });
-    }
-  }
-}
+});
 
 mainButton.addEventListener('click', function(e){
   statusDiv.innerHTML = "Waiting for response...";
@@ -63,12 +45,19 @@ mainButton.addEventListener('click', function(e){
 
     ipc.send('makeRequest', requestDetails);
     mainButton.setAttribute('disabled', '');
+
     ipc.on('makeResponse', function(e, data) {
       statusDiv.innerHTML = "<span class='_599'>No response.</span>";
       mainBodyHidden.value = '';
       if(typeof data.response !== 'undefined'){
         statusDiv.innerHTML = "<span class='_" + data.response.statusCode + "'>" + data.response.statusCode + " " + data.response.statusMessage + "</span>";
-        mainBodyHidden.value = JSON.stringify(JSON.parse(data.body), undefined, 2);
+        try {
+          mainBodyHidden.value = JSON.stringify(JSON.parse(data.body), undefined, 2);
+        }
+        catch(err) {
+          mainBodyHidden.value = data.body;
+          console.log('Couldn\'t parse JSON. Got error: ' + err);
+        }
       }
       mainButton.removeAttribute('disabled');
       triggerEvent('change', mainBodyHidden);
@@ -77,15 +66,8 @@ mainButton.addEventListener('click', function(e){
 });
 
 ipc.on('loadSavedRequests', function (e, requests) {
-  vue.savedRequests = JSON.parse(requests);
-  vue.sidebarItems = vue.savedRequests;
-
-  var folderObject = {
-    opened: false,
-    items: vue.sidebarItems,
-  };
-
-  vue.sidebarFolders.push(folderObject);
+  vue.sidebar = JSON.parse(requests);
+  vue.savedRequests = vue.sidebar;
 });
 
 var vue = new Vue({
@@ -96,36 +78,41 @@ var vue = new Vue({
     requestType: 'get',
     requestLink: 'http://api.football-data.org/v1/soccerseasons/424/',
     requestHeaders: [{name: 'X-Auth-Token', value: 'fe33c7da872942c19b6c5f236797cd7b'}],
+    requestFolder: {},
     savedRequests: [],
-    previousRequests: [],
-    sidebarItems: [],
-    sidebarFolders: [{opened: false, items: []}],
+    historicRequests: {
+      folders: [{
+        name: '',
+        opened: true,
+        savedRequests:[],
+      }]
+    },
+    sidebar: {},
     clicked: [false],
     active: [true]
   },
   methods: {
-    addPreviousRequest: function() {
-      var previousRequest = {
+    addHistoryRequest: function() {
+      var request = {
         requestType: this.requestType,
         requestLink: this.requestLink,
         requestHeaders: unBind(this.requestHeaders),
       };
 
       var exists = false;
-      for(var i = 0; i < this.previousRequests.length; i++){
+      for(var i = 0; i < this.historicRequests.folders[0].savedRequests.length; i++){
         var currentRequest = {
-          requestType: this.previousRequests[i].requestType,
-          requestLink: this.previousRequests[i].requestLink,
-          requestHeaders: unBind(this.previousRequests[i].requestHeaders),
+          requestType: this.historicRequests.folders[0].savedRequests[i].requestType,
+          requestLink: this.historicRequests.folders[0].savedRequests[i].requestLink,
+          requestHeaders: unBind(this.historicRequests.folders[0].savedRequests[i].requestHeaders),
         };
-        if(JSON.stringify(currentRequest) == JSON.stringify(previousRequest)){
+        if(JSON.stringify(currentRequest) == JSON.stringify(request)){
           exists = true;
         }
       }
 
       if(!exists){
-        this.previousRequests.push(previousRequest);
-        ipc.send('saveRequests', this.savedRequests);
+        this.sidebar.folders[0].savedRequests.push(request);
       }
 
       var count = 0;
@@ -159,7 +146,7 @@ var vue = new Vue({
       }
 
       if(!exists){
-        this.savedRequests.push(saveRequest);
+        this.sidebar.folders[this.requestFolder].savedRequests.push(saveRequest);
         ipc.send('saveRequests', this.savedRequests);
       }
 
@@ -175,13 +162,14 @@ var vue = new Vue({
         this.tabs.push(currentRequest);
       }
     },
-    populateRequestForm: function(index) {
-      var selectedRequest = this.sidebarItems[index];
+    populateRequestForm: function(folderIndex, itemIndex) {
+      var selectedRequest = this.sidebar.folders[folderIndex].savedRequests[itemIndex];
 
       if(typeof selectedRequest !== 'undefined'){
         this.requestType = selectedRequest.requestType;
         this.requestLink = selectedRequest.requestLink;
         this.requestHeaders = selectedRequest.requestHeaders;
+        this.requestFolder = {id: folderIndex, name: this.sidebar.folders[folderIndex].name};
       }
 
       for(var i = 0; i < this.clicked.length; i++){
@@ -195,7 +183,7 @@ var vue = new Vue({
       var count = 0;
       for(var i = 0; i < this.tabs.length; i++){
         if(this.tabs[i].requestLink === selectedRequest.requestLink){
-          this.active.$set(index, true);
+          this.active.$set(i, true);
           count++;
         }
       }
@@ -256,7 +244,7 @@ var vue = new Vue({
       this.tabs.$remove(this.tabs[index]);
     },
     removePreviousRequest: function(index) {
-      this.previousRequests.$remove(this.previousRequests[index]);
+      this.historicRequests.$remove(this.historicRequests[index]);
       ipc.send('saveRequests', this.savedRequests);
     },
     addTab: function(request = null){
@@ -271,38 +259,27 @@ var vue = new Vue({
     },
     loadSidebarData: function() {
       if(this.sidebarHeader == 'history'){
-        this.sidebarFolders = [];
-        this.sidebarItems = this.previousRequests;
+        this.sidebar = this.historicRequests;
         return;
       }
-
-      this.sidebarItems = this.savedRequests;
-
-      this.sidebarFolders = [];
-
-      var folderObject = {
-        opened: false,
-        items: this.sidebarItems,
-      };
-
-      this.sidebarFolders.push(folderObject);
+      this.sidebar = this.savedRequests;
     },
     toggleFolder: function(index) {
-      var saveableFolderObject = this.sidebarFolders[index];
+      var folder = this.sidebar.folders[index];
 
-      if(saveableFolderObject.opened){
-        saveableFolderObject.opened = false;
+      if(folder.opened){
+        folder.opened = false;
       }else{
-        saveableFolderObject.opened = true;
+        folder.opened = true;
       }
 
-      this.sidebarFolders.$set(index, saveableFolderObject);
+      this.sidebar.folders.$set(index, folder);
     },
     shouldDisplay: function(index) {
-      if(typeof this.sidebarFolders[0] === 'undefined'){
+      if(typeof this.sidebar.folders[index] === 'undefined'){
         return true;
       }
-      return this.sidebarFolders[0].opened;
+      return this.sidebar.folders[index].opened;
     },
   },
   computed: {
